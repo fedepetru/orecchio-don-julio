@@ -1,0 +1,544 @@
+{
+  "client_name": "Don Julio",
+  "place_name": "Don Julio",
+  "rating_global": 4.4,
+  "total_reviews_en_google": 19102,
+  "reviews_analizadas": 721,
+  "rating_promedio_analizadas": 4.18,
+  "distribucion_estrellas": {
+    "1": 56,
+    "2": 41,
+    "3": 75,
+    "4": 93,
+    "5": 456
+  },
+  "resumen": "Don Julio es ampliamente reconocido por la excelente calidad de su carne (80.9/100) y su servicio de primera categoría (76.4/100), lo que justifica su reputación como restaurante icónico de Buenos Aires. Sin embargo, existe una desconexión significativa entre las expectativas generadas por su fama y el precio cobrado, con muchos clientes sintiéndose decepcionados por la relación costo-beneficio. El principal talón de Aquiles es el tema de precios (25.1/100), que es sistemáticamente criticado incluso por quienes reconocen la calidad del producto. Otros puntos débiles incluyen el ambiente y comodidad (63.0/100), particularmente por las mesas muy juntas, y la gestión de problemas (12.8/100), donde faltan disponibilidades no comunicadas y detalles como baños en mal estado.",
+  "resumen_4_estrellas": "Los clientes que calificaron con 4 estrellas reconocen la calidad superior de la carne, el servicio atento y la experiencia general positiva, pero cuestionan constructivamente varios aspectos operacionales. Critican la falta de comunicación sobre disponibilidades de cortes (esperan saberlo al tomar el pedido, no después de esperar), la disposición de mesas excesivamente cercanas que impide conversaciones privadas, la gestión del confort ambiental (frío en sectores descubiertos sin cancelación preventiva), y fundamentalmente cuestionan si el precio justifica la experiencia completa, sugiriendo que hay alternativas de similar o mejor calidad a menor costo.",
+  "conclusiones_nota": "Impacto estimado = cuánto subiría el rating promedio de las 721 reseñas analizadas (hoy 4.18 ★) si quienes criticaron ese punto hubieran sumado +1 estrella. Son estimaciones independientes y NO sumables: una misma reseña suele criticar varias cosas.",
+  "conclusiones": [
+    {
+      "titulo": "Crear menú degustación de precio accesible",
+      "detalle": "Lanzar una opción con porciones más pequeñas o menos cortes premium que permita conocer Don Julio a clientes locales con presupuesto limitado. Esto amplía mercado y reduce el sentimiento de 'lugar inaccesible'.",
+      "tema_asociado": "Precios y valor",
+      "impacto_delta": 0.16,
+      "impacto_estimado": "+0.16 ★"
+    },
+    {
+      "titulo": "Entrenar staff en ventas consultivas, no insistentes",
+      "detalle": "Varias reseñas mencionan sommeliers o mozas demasiado insistentes con vinos premium, generando incomodidad. Cambiar de modelo de venta agresiva a consultoría cuidadosa que respete los presupuestos del cliente.",
+      "tema_asociado": "Atención y servicio",
+      "impacto_delta": 0.13,
+      "impacto_estimado": "+0.13 ★"
+    },
+    {
+      "titulo": "Estandarizar punto de cocción y comunicar métodos",
+      "detalle": "Hay inconsistencias reportadas (carnes con más sangre o sal de la esperada). Recapacitar personal de parrilla y considerar consultar punto deseado con más detalle. Incluir en presentación los métodos de maduración/cocción para justificar precio premium.",
+      "tema_asociado": "Calidad de la carne",
+      "impacto_delta": 0.11,
+      "impacto_estimado": "+0.11 ★"
+    },
+    {
+      "titulo": "Reorganizar distribución de mesas en planta baja",
+      "detalle": "Las mesas están demasiado próximas, permitiendo que conversaciones ajenas interfieran con la experiencia. Considerar mayor espaciamiento o reconfiguración que mejore privacidad sin reducir capacidad (evaluar planta alta como modelo exitoso).",
+      "tema_asociado": "Ambiente y comodidad",
+      "impacto_delta": 0.09,
+      "impacto_estimado": "+0.09 ★"
+    },
+    {
+      "titulo": "Auditoría y mantenimiento preventivo de instalaciones",
+      "detalle": "Revisar baños, techos y sistemas de climatización (especialmente sectores al aire libre). Un restaurante con estrella Michelin no puede tener baños sucios o salpicados. Implementar checks horarios.",
+      "tema_asociado": "Ambiente y comodidad",
+      "impacto_delta": 0.09,
+      "impacto_estimado": "+0.09 ★"
+    },
+    {
+      "titulo": "Comunicar disponibilidad de cortes antes de servir",
+      "detalle": "Implementar sistema donde se informa al tomar el pedido (no después de 10 minutos de espera) qué cortes específicos no están disponibles ese día. Esto evita generar expectativas falsas y mejora la percepción de control y profesionalismo.",
+      "tema_asociado": "Gestión de especificaciones y problemas",
+      "impacto_delta": 0.05,
+      "impacto_estimado": "+0.05 ★"
+    }
+  ],
+  "comentarios_reales": [
+    {
+      "usuario": "Pablo Bianchi",
+      "estrellas": 5,
+      "fecha": "2026-04-15",
+      "reseñas_del_usuario": 180,
+      "texto": "Best experience is inside.  Incredible we'll trained staff, not only in efficiency but also in kindness.  The best fries you will ever eat. And the perfectly well grilled steak. They are really in the Hall of Fire"
+    },
+    {
+      "usuario": "Cengizhan Özdemir",
+      "estrellas": 5,
+      "fecha": "2026-04-14",
+      "reseñas_del_usuario": 5,
+      "texto": "23 Ocak 2026 cuma günü hayatımda yediğim en güzel etlerini yediğim Arjantin restauranti yada bir yemek sever için kutsal bir tapınmak gibidir."
+    },
+    {
+      "usuario": "Antonela Montenegro",
+      "estrellas": 5,
+      "fecha": "2026-04-14",
+      "reseñas_del_usuario": 25,
+      "texto": "Las carnes 10/10 sin embargo se demoraron mucho en nuestro servicio, a pesar que tuvimos una reserva desde hace 2 meses, volvería a ir de igual manera, vale la pena!"
+    },
+    {
+      "usuario": "Raul Roque",
+      "estrellas": 4,
+      "fecha": "2026-05-07",
+      "reseñas_del_usuario": 4,
+      "texto": "Excelente restaurante com boas instalações e serviço perfeito e muito atencioso!!!<br>A comida é muito boa para quem gosta de carne.....<br>Carta de vinhos fantástica!"
+    },
+    {
+      "usuario": "Mariano García",
+      "estrellas": 4,
+      "fecha": "2026-04-30",
+      "reseñas_del_usuario": 6,
+      "texto": "La comida es un 10 , la atención un 20 , y el lugar cómodo , bajo una estrella porque los precios están altísimos , no digo que no lo vale , sino que se encuentra inaccesible para muchas personas , fuimos a comer 2 y gastamos 296 mil pesos , después el resto es hermoso , pero podrían hacer menú un poco más accesible para que más gente los pueda conocer"
+    },
+    {
+      "usuario": "Usuário do Google",
+      "estrellas": 3,
+      "fecha": "2026-04-07",
+      "reseñas_del_usuario": 19,
+      "texto": "Não fui bem tratado no restaurante. Estava muito frio e haviam mesas disponíveis na parte interior, no entanto a garçonete não fez questão de oferecer a mesa, mesmo quando reclamamos do frio! A comida é boa mas nada de mais, pelo preço esperava mais!"
+    },
+    {
+      "usuario": "Dave Mariani",
+      "estrellas": 3,
+      "fecha": "2026-03-29",
+      "reseñas_del_usuario": 717,
+      "texto": "Way overpriced for the town, steaks were average.  Apps were weak.  The horse salami was below average.  Wait staff was slow and uneducated.  Breads were great.  Steaks at javis and value was better."
+    },
+    {
+      "usuario": "horacio deza",
+      "estrellas": 2,
+      "fecha": "2026-03-31",
+      "reseñas_del_usuario": 6,
+      "texto": "Es lugar para turistas. Hay otros lugares mejores. Más económicos y con carne de la misma y mejor calidad. Sobreprecio en todo. No iría nuevamente."
+    },
+    {
+      "usuario": "Rodrigo Magalhães Tabarez",
+      "estrellas": 1,
+      "fecha": "2026-05-10",
+      "reseñas_del_usuario": 2,
+      "texto": "PODEM FUGIR DESTE! Já foi bom um dia. Serviço pessimo (com erro de ponto de carne), garçons despreparados para atender a restrição alimentícia e além de tudo preço abusivo e se n bastasse isso ainda fizeram a cobrança da cobrança on line por não comparecimento no estabelecimento, e agora teremos mais um dor de cabeça para ressarcirmos o dinheiro"
+    }
+  ],
+  "temas": [
+    {
+      "nombre": "Calidad de la carne",
+      "descripcion": "Características, sabor, textura, punto de cocción y frescura de los cortes de carne ofrecidos",
+      "palabras_clave": [
+        "carne",
+        "bife",
+        "asado",
+        "entrecot",
+        "ojo de bife",
+        "entraña",
+        "chorizo",
+        "morcilla",
+        "tierna",
+        "jugosa",
+        "cocción",
+        "punto",
+        "sabor",
+        "marmoleo",
+        "carne cruda",
+        "carne dura",
+        "carne seca"
+      ],
+      "menciones": 527,
+      "sentimiento_pct": {
+        "positivo": 77.6,
+        "negativo": 15.7,
+        "neutro": 1.3,
+        "mixto": 5.3
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 78.1,
+        "negativo": 14.8,
+        "neutro": 1.2,
+        "mixto": 5.9
+      },
+      "score_0_100": 80.9,
+      "score_0_100_ponderado": 81.6,
+      "ejemplos": {
+        "positivo": "La carne estaba jugosa, bien cocida al punto que pedí y se deshacía en la boca.",
+        "negativo": "El bife llegó duro como una suela y frío, una decepción total.",
+        "neutro": "Nos sirvieron carne de res con las características típicas del lugar.",
+        "mixto": "El lomo estaba excelente pero el asado vino un poco seco."
+      }
+    },
+    {
+      "nombre": "Atención y servicio",
+      "descripcion": "Calidad del servicio prestado por meseros, camareros y personal, atención al cliente, profesionalismo y cortesía",
+      "palabras_clave": [
+        "servicio",
+        "atención",
+        "mozo",
+        "camarero",
+        "mesero",
+        "profesional",
+        "amable",
+        "cordial",
+        "atento",
+        "desatento",
+        "impecable",
+        "lento",
+        "rápido",
+        "personalizado",
+        "impersonal",
+        "rudo",
+        "educado"
+      ],
+      "menciones": 477,
+      "sentimiento_pct": {
+        "positivo": 73.6,
+        "negativo": 20.8,
+        "neutro": 0.4,
+        "mixto": 5.2
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 75.5,
+        "negativo": 19.3,
+        "neutro": 0.4,
+        "mixto": 4.7
+      },
+      "score_0_100": 76.4,
+      "score_0_100_ponderado": 78.0,
+      "ejemplos": {
+        "positivo": "Los mozos fueron atentos, cordiales y pendientes de todo sin ser invasivos.",
+        "negativo": "Esperamos 20 minutos para que alguien nos tomara el pedido y se notaba que no les importaba.",
+        "neutro": "El personal cumplió con su función de traer los platos y refill de agua.",
+        "mixto": "Al principio fuimos bien atendidos pero después desaparecieron cuando necesitábamos algo."
+      }
+    },
+    {
+      "nombre": "Experiencia general y reputación",
+      "descripcion": "Impresión general de la visita, cumplimiento de expectativas, reputación internacional y relación con la fama del lugar",
+      "palabras_clave": [
+        "experiencia",
+        "memorable",
+        "expectativas",
+        "hype",
+        "fama",
+        "sobrevalorado",
+        "Michelin",
+        "turista",
+        "trap",
+        "reputación",
+        "decepción",
+        "extraordinario",
+        "injustificado"
+      ],
+      "menciones": 373,
+      "sentimiento_pct": {
+        "positivo": 70.0,
+        "negativo": 24.1,
+        "neutro": 0.8,
+        "mixto": 5.1
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 71.3,
+        "negativo": 22.7,
+        "neutro": 0.9,
+        "mixto": 5.1
+      },
+      "score_0_100": 73.0,
+      "score_0_100_ponderado": 74.3,
+      "ejemplos": {
+        "positivo": "Cumplió y superó todas mis expectativas, ahora entiendo por qué es tan recomendado.",
+        "negativo": "Una decepción total, no justifica para nada la fama que tiene.",
+        "neutro": "Tuvimos una experiencia normal, nada del otro mundo pero tampoco malo.",
+        "mixto": "Algunos detalles fueron excelentes pero en general no llegó a las expectativas que generaba su reputación."
+      }
+    },
+    {
+      "nombre": "Ambiente y comodidad",
+      "descripcion": "Atmósfera del lugar, decoración, temperatura, espacio entre mesas, ruido y confort general",
+      "palabras_clave": [
+        "ambiente",
+        "clima",
+        "frío",
+        "calefacción",
+        "espacio",
+        "mesas pegadas",
+        "apto",
+        "confortable",
+        "incómodo",
+        "ruido",
+        "decoración",
+        "elegancia",
+        "bullicio",
+        "oscuro",
+        "acogedor"
+      ],
+      "menciones": 211,
+      "sentimiento_pct": {
+        "positivo": 61.1,
+        "negativo": 35.1,
+        "neutro": 0.9,
+        "mixto": 2.8
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 62.3,
+        "negativo": 33.5,
+        "neutro": 0.8,
+        "mixto": 3.5
+      },
+      "score_0_100": 63.0,
+      "score_0_100_ponderado": 64.5,
+      "ejemplos": {
+        "positivo": "El lugar tiene una atmósfera acogedora, buena música de fondo y las mesas están bien espaciadas.",
+        "negativo": "Estaba abarrotado, hacía un calor infernal y no se podía ni conversar de tanta bulla.",
+        "neutro": "El restaurante es funcional, con buena iluminación y mesas cómodas.",
+        "mixto": "Hermosa decoración pero las sillas son incómodas y el lugar estaba muy ruidoso esa noche."
+      }
+    },
+    {
+      "nombre": "Acompañamientos y extras",
+      "descripcion": "",
+      "palabras_clave": [
+        "acompañamiento",
+        "papas fritas",
+        "puré",
+        "ensalada",
+        "verduras",
+        "boniato",
+        "pan",
+        "chimichurri",
+        "provoleta",
+        "acelga",
+        "empanada",
+        "guarnición",
+        "calabaza",
+        "carpaccio"
+      ],
+      "menciones": 203,
+      "sentimiento_pct": {
+        "positivo": 75.4,
+        "negativo": 19.2,
+        "neutro": 1.0,
+        "mixto": 4.4
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 76.6,
+        "negativo": 18.0,
+        "neutro": 0.9,
+        "mixto": 4.4
+      },
+      "score_0_100": 78.1,
+      "score_0_100_ponderado": 79.2,
+      "ejemplos": {
+        "positivo": "Las guarniciones eran creativas, frescas y complementaban perfecto con la carne.",
+        "negativo": "Las papas llegaron frías y los vegetales parecían recalentados.",
+        "neutro": "Vinieron con guarniciones estándar: papas y ensalada.",
+        "mixto": "La ensalada estaba excelente pero las papas al horno medio crudas."
+      }
+    },
+    {
+      "nombre": "Postres y bebidas",
+      "descripcion": "",
+      "palabras_clave": [
+        "vino",
+        "Malbec",
+        "champagne",
+        "prosecco",
+        "dulce de leche",
+        "helado",
+        "flan",
+        "crepes",
+        "postre",
+        "bebidas",
+        "cava",
+        "bodega",
+        "bebida",
+        "licor",
+        "cerveza"
+      ],
+      "menciones": 190,
+      "sentimiento_pct": {
+        "positivo": 85.8,
+        "negativo": 11.6,
+        "neutro": 1.1,
+        "mixto": 1.6
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 87.8,
+        "negativo": 9.7,
+        "neutro": 0.8,
+        "mixto": 1.8
+      },
+      "score_0_100": 87.1,
+      "score_0_100_ponderado": 89.1,
+      "ejemplos": {
+        "positivo": "Los postres caseros eran deliciosos y la carta de vinos tiene opciones para todos los gustos.",
+        "negativo": "El postre era una porción minúscula y el vino que pedimos estaba oxidado.",
+        "neutro": "Tienen postres y una selección de bebidas disponibles en la carta.",
+        "mixto": "Las cervezas bien fría pero los postres de la casa están un poco aburridos."
+      }
+    },
+    {
+      "nombre": "Precios y valor",
+      "descripcion": "Costo de los platos, relación precio-calidad, cargos adicionales y accesibilidad económica",
+      "palabras_clave": [
+        "precio",
+        "caro",
+        "carisimo",
+        "valor",
+        "costo",
+        "relación precio-calidad",
+        "accesible",
+        "inaccesible",
+        "couvert",
+        "caro",
+        "elevado",
+        "abusivo",
+        "excesivo",
+        "económico"
+      ],
+      "menciones": 186,
+      "sentimiento_pct": {
+        "positivo": 18.3,
+        "negativo": 68.3,
+        "neutro": 1.1,
+        "mixto": 12.4
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 18.7,
+        "negativo": 66.2,
+        "neutro": 1.0,
+        "mixto": 14.2
+      },
+      "score_0_100": 25.1,
+      "score_0_100_ponderado": 26.3,
+      "ejemplos": {
+        "positivo": "Muy buena relación precio-calidad, salimos conformes y sin sentir que nos robaron.",
+        "negativo": "Carísimo para la calidad que ofrecen, además te cobran hasta el pan de entrada.",
+        "neutro": "Los precios son acordes a lo que es un restaurante de este tipo.",
+        "mixto": "Las carnes tienen buenos precios pero los vinos y postres están muy inflados."
+      }
+    },
+    {
+      "nombre": "Reservas y acceso",
+      "descripcion": "",
+      "palabras_clave": [
+        "reserva",
+        "reservación",
+        "espera",
+        "cancelación",
+        "disponibilidad",
+        "cupos",
+        "anticipación",
+        "acceso",
+        "fila",
+        "demora",
+        "tiempo de espera",
+        "walk-in"
+      ],
+      "menciones": 117,
+      "sentimiento_pct": {
+        "positivo": 29.1,
+        "negativo": 48.7,
+        "neutro": 17.9,
+        "mixto": 4.3
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 32.4,
+        "negativo": 44.1,
+        "neutro": 19.3,
+        "mixto": 4.2
+      },
+      "score_0_100": 40.2,
+      "score_0_100_ponderado": 44.1,
+      "ejemplos": {
+        "positivo": "Conseguí mesa fácil por teléfono y fue rápido, muy ágil el sistema de reservas.",
+        "negativo": "Imposible conseguir reserva, llamé varias veces y nada, terrible la gestión.",
+        "neutro": "Las reservas se hacen online o por teléfono sin inconvenientes.",
+        "mixto": "Rápido para reservar pero llegamos y nos hicieron esperar igual aunque teníamos reserva confirmada."
+      }
+    },
+    {
+      "nombre": "Recepción y bienvenida",
+      "descripcion": "",
+      "palabras_clave": [
+        "recepción",
+        "bienvenida",
+        "champagne",
+        "empanada",
+        "cortesía",
+        "hospitalidad",
+        "anfitrión",
+        "anfitriona",
+        "prosecco",
+        "sopa",
+        "primer contacto",
+        "espera",
+        "amable",
+        "soberbio",
+        "grosero"
+      ],
+      "menciones": 98,
+      "sentimiento_pct": {
+        "positivo": 84.7,
+        "negativo": 14.3,
+        "neutro": 0.0,
+        "mixto": 1.0
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 87.5,
+        "negativo": 12.0,
+        "neutro": 0.0,
+        "mixto": 0.5
+      },
+      "score_0_100": 85.2,
+      "score_0_100_ponderado": 87.8,
+      "ejemplos": {
+        "positivo": "Nos recibieron con una sonrisa genuina, nos hicieron sentir bienvenidos desde el primer momento.",
+        "negativo": "Nadie nos recibió en la puerta, nos miraron con cara de fastidio como si fuéramos un incordio.",
+        "neutro": "Nos saludaron al entrar y nos llevaron a la mesa.",
+        "mixto": "La anfitriona fue amable pero después el mozo fue bastante desinteresado."
+      }
+    },
+    {
+      "nombre": "Gestión de especificaciones y problemas",
+      "descripcion": "",
+      "palabras_clave": [
+        "error",
+        "especial",
+        "alergia",
+        "cambio",
+        "pedido",
+        "reclamación",
+        "compensación",
+        "problema",
+        "incidente",
+        "duplicado",
+        "cobro",
+        "reembolso",
+        "falla"
+      ],
+      "menciones": 47,
+      "sentimiento_pct": {
+        "positivo": 12.8,
+        "negativo": 87.2,
+        "neutro": 0.0,
+        "mixto": 0.0
+      },
+      "sentimiento_pct_ponderado": {
+        "positivo": 12.6,
+        "negativo": 87.4,
+        "neutro": 0.0,
+        "mixto": 0.0
+      },
+      "score_0_100": 12.8,
+      "score_0_100_ponderado": 12.6,
+      "ejemplos": {
+        "positivo": "Pedí el bife sin sal y muy jugoso, llegó exactamente como lo quería.",
+        "negativo": "Le dije al mozo que no quería cebolla y vino con cebolla igual, además no quisieron cambiar.",
+        "neutro": "Tomaron nota de mis preferencias y las prepararon en la cocina.",
+        "mixto": "Respetaron que quisiera sin ajo pero se olvidaron de mandarme los acompañamientos aparte."
+      }
+    }
+  ]
+}

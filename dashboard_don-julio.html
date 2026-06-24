@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablero de reseñas</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --card2:#1f2330; --txt:#e8eaed; --muted:#9aa0aa;
+          --pos:#2ecc71; --neg:#e74c3c; --neu:#95a5a6; --mix:#f1c40f; --accent:#e67e22; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--txt); }
+  .wrap { max-width:1100px; margin:0 auto; padding:32px 20px 90px; }
+  h1 { margin:0 0 4px; font-size:28px; }
+  .sub { color:var(--muted); margin-bottom:24px; }
+  .badge { display:inline-block; background:var(--card2); color:var(--muted); font-size:12px;
+           padding:3px 10px; border-radius:20px; margin-bottom:20px; }
+  .stats { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
+  .stat { background:var(--card); border-radius:12px; padding:16px 20px; flex:1; min-width:150px; }
+  .stat .n { font-size:26px; font-weight:700; }
+  .stat .l { color:var(--muted); font-size:13px; }
+  h2 { font-size:19px; margin:34px 0 14px; }
+  .card { background:var(--card); border-radius:12px; padding:20px 22px; }
+  .cloud { display:flex; flex-wrap:wrap; gap:14px 22px; align-items:center; justify-content:center; }
+  .cloud span { line-height:1; cursor:default; }
+  p.resumen { line-height:1.6; margin:0; font-size:15px; }
+  /* distribución de estrellas */
+  .star-row { display:flex; align-items:center; gap:12px; margin:8px 0; }
+  .star-lbl { width:48px; text-align:right; color:var(--muted); font-size:14px; white-space:nowrap; }
+  .star-track { flex:1; background:#11141a; border-radius:6px; height:24px; overflow:hidden; }
+  .star-fill { height:100%; border-radius:6px; }
+  .star-val { width:120px; font-size:13px; color:var(--muted); }
+  /* temas */
+  .theme { background:var(--card); border-radius:12px; padding:16px 20px; margin-bottom:12px; cursor:default; }
+  .theme-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .theme-name { font-size:17px; font-weight:600; }
+  .theme-desc { color:var(--muted); font-size:13px; margin:2px 0 10px; }
+  .theme-meta { color:var(--muted); font-size:13px; }
+  .score { font-weight:700; font-size:18px; }
+  .bar { display:flex; height:22px; border-radius:6px; overflow:hidden; background:#222; }
+  .bar > div { display:flex; align-items:center; justify-content:center; font-size:11px; color:#0a0a0a; font-weight:700; }
+  .kw { color:var(--muted); font-size:12px; margin-top:8px; }
+  .legend { display:flex; gap:18px; flex-wrap:wrap; margin:6px 0 16px; font-size:13px; color:var(--muted); }
+  .legend i { display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:middle; }
+  .hint { color:var(--muted); font-size:12px; font-style:italic; }
+  /* carrusel de comentarios reales */
+  .carousel { position:relative; }
+  .car-stars { color:var(--mix); font-size:17px; letter-spacing:3px; }
+  .car-text { font-size:15.5px; line-height:1.6; margin:12px 0; }
+  .car-meta { color:var(--muted); font-size:13px; }
+  .car-nav { display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
+  .car-btn { background:var(--card2); color:var(--txt); border:none; border-radius:8px;
+             padding:8px 14px; cursor:pointer; font-size:14px; }
+  .car-btn:hover { background:#2a2f3a; }
+  .car-dots { display:flex; gap:7px; }
+  .car-dot { width:9px; height:9px; border-radius:50%; background:#3a3f4a; cursor:pointer; }
+  .car-dot.active { background:var(--accent); }
+  /* conclusiones */
+  .nota { color:var(--muted); font-size:12.5px; font-style:italic; margin-bottom:14px; line-height:1.55; }
+  .concl { background:var(--card); border-left:3px solid var(--accent); border-radius:8px;
+           padding:14px 18px; margin-bottom:10px; }
+  .concl-head { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:4px; }
+  .concl-head b { font-size:15px; }
+  .impacto { background:var(--accent); color:#0a0a0a; font-weight:700; font-size:13px;
+             padding:3px 11px; border-radius:20px; white-space:nowrap; }
+  .concl span.det { color:var(--muted); font-size:14px; line-height:1.5; }
+  /* tooltip flotante */
+  #tip { position:fixed; pointer-events:none; z-index:99; background:#0b0d12; border:1px solid #2a2f3a;
+         border-radius:10px; padding:12px 14px; max-width:340px; font-size:12.5px; line-height:1.45;
+         box-shadow:0 8px 24px rgba(0,0,0,.5); display:none; }
+  #tip h4 { margin:0 0 8px; font-size:13px; }
+  #tip .ex { margin:6px 0; }
+  #tip .tag { font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <div class="sub" id="subtitle"></div>
+  <div class="badge" id="mode"></div>
+
+  <div class="stats" id="stats"></div>
+
+  <h2>Temas más mencionados</h2>
+  <div class="card cloud" id="cloud"></div>
+
+  <h2>Resumen</h2>
+  <div class="card"><p class="resumen" id="resumen"></p></div>
+
+  <h2>Comentarios reales <span class="hint">— textuales, para verificar que el análisis es consecuente</span></h2>
+  <div class="card carousel" id="carousel"></div>
+
+  <h2>Distribución por estrellas</h2>
+  <div class="card" id="stars"></div>
+
+  <h2>Sentimiento por tema</h2>
+  <div class="legend">
+    <span><i style="background:var(--pos)"></i>Positivo</span>
+    <span><i style="background:var(--mix)"></i>Mixto</span>
+    <span><i style="background:var(--neu)"></i>Neutro</span>
+    <span><i style="background:var(--neg)"></i>Negativo</span>
+    <span style="margin-left:auto">Score: 0% (peor) &rarr; 100% (mejor)</span>
+  </div>
+  <div class="hint" style="margin-bottom:12px">Pasá el mouse por encima de una barra para ver qué se considera positivo, mixto, neutro o negativo en ese tema.</div>
+  <div id="themes"></div>
+
+  <h2>4 estrellas <span class="hint">— la crítica más honesta</span></h2>
+  <div class="card"><p class="resumen" id="cuatro"></p></div>
+
+  <h2>Conclusiones <span class="hint">— quick wins de corto plazo</span></h2>
+  <div id="conclusiones"></div>
+</div>
+
+<div id="tip"></div>
+
+<script>
+const DATA = {"client_name": "Don Julio", "place_name": "Don Julio", "rating_global": 4.4, "total_reviews_en_google": 19102, "reviews_analizadas": 721, "rating_promedio_analizadas": 4.18, "distribucion_estrellas": {"1": 56, "2": 41, "3": 75, "4": 93, "5": 456}, "resumen": "Don Julio es ampliamente reconocido por la excelente calidad de su carne (80.9/100) y su servicio de primera categoría (76.4/100), lo que justifica su reputación como restaurante icónico de Buenos Aires. Sin embargo, existe una desconexión significativa entre las expectativas generadas por su fama y el precio cobrado, con muchos clientes sintiéndose decepcionados por la relación costo-beneficio. El principal talón de Aquiles es el tema de precios (25.1/100), que es sistemáticamente criticado incluso por quienes reconocen la calidad del producto. Otros puntos débiles incluyen el ambiente y comodidad (63.0/100), particularmente por las mesas muy juntas, y la gestión de problemas (12.8/100), donde faltan disponibilidades no comunicadas y detalles como baños en mal estado.", "resumen_4_estrellas": "Los clientes que calificaron con 4 estrellas reconocen la calidad superior de la carne, el servicio atento y la experiencia general positiva, pero cuestionan constructivamente varios aspectos operacionales. Critican la falta de comunicación sobre disponibilidades de cortes (esperan saberlo al tomar el pedido, no después de esperar), la disposición de mesas excesivamente cercanas que impide conversaciones privadas, la gestión del confort ambiental (frío en sectores descubiertos sin cancelación preventiva), y fundamentalmente cuestionan si el precio justifica la experiencia completa, sugiriendo que hay alternativas de similar o mejor calidad a menor costo.", "conclusiones_nota": "Impacto estimado = cuánto subiría el rating promedio de las 721 reseñas analizadas (hoy 4.18 ★) si quienes criticaron ese punto hubieran sumado +1 estrella. Son estimaciones independientes y NO sumables: una misma reseña suele criticar varias cosas.", "conclusiones": [{"titulo": "Crear menú degustación de precio accesible", "detalle": "Lanzar una opción con porciones más pequeñas o menos cortes premium que permita conocer Don Julio a clientes locales con presupuesto limitado. Esto amplía mercado y reduce el sentimiento de 'lugar inaccesible'.", "tema_asociado": "Precios y valor", "impacto_delta": 0.16, "impacto_estimado": "+0.16 ★"}, {"titulo": "Entrenar staff en ventas consultivas, no insistentes", "detalle": "Varias reseñas mencionan sommeliers o mozas demasiado insistentes con vinos premium, generando incomodidad. Cambiar de modelo de venta agresiva a consultoría cuidadosa que respete los presupuestos del cliente.", "tema_asociado": "Atención y servicio", "impacto_delta": 0.13, "impacto_estimado": "+0.13 ★"}, {"titulo": "Estandarizar punto de cocción y comunicar métodos", "detalle": "Hay inconsistencias reportadas (carnes con más sangre o sal de la esperada). Recapacitar personal de parrilla y considerar consultar punto deseado con más detalle. Incluir en presentación los métodos de maduración/cocción para justificar precio premium.", "tema_asociado": "Calidad de la carne", "impacto_delta": 0.11, "impacto_estimado": "+0.11 ★"}, {"titulo": "Reorganizar distribución de mesas en planta baja", "detalle": "Las mesas están demasiado próximas, permitiendo que conversaciones ajenas interfieran con la experiencia. Considerar mayor espaciamiento o reconfiguración que mejore privacidad sin reducir capacidad (evaluar planta alta como modelo exitoso).", "tema_asociado": "Ambiente y comodidad", "impacto_delta": 0.09, "impacto_estimado": "+0.09 ★"}, {"titulo": "Auditoría y mantenimiento preventivo de instalaciones", "detalle": "Revisar baños, techos y sistemas de climatización (especialmente sectores al aire libre). Un restaurante con estrella Michelin no puede tener baños sucios o salpicados. Implementar checks horarios.", "tema_asociado": "Ambiente y comodidad", "impacto_delta": 0.09, "impacto_estimado": "+0.09 ★"}, {"titulo": "Comunicar disponibilidad de cortes antes de servir", "detalle": "Implementar sistema donde se informa al tomar el pedido (no después de 10 minutos de espera) qué cortes específicos no están disponibles ese día. Esto evita generar expectativas falsas y mejora la percepción de control y profesionalismo.", "tema_asociado": "Gestión de especificaciones y problemas", "impacto_delta": 0.05, "impacto_estimado": "+0.05 ★"}], "comentarios_reales": [{"usuario": "Pablo Bianchi", "estrellas": 5, "fecha": "2026-04-15", "reseñas_del_usuario": 180, "texto": "Best experience is inside.  Incredible we'll trained staff, not only in efficiency but also in kindness.  The best fries you will ever eat. And the perfectly well grilled steak. They are really in the Hall of Fire"}, {"usuario": "Cengizhan Özdemir", "estrellas": 5, "fecha": "2026-04-14", "reseñas_del_usuario": 5, "texto": "23 Ocak 2026 cuma günü hayatımda yediğim en güzel etlerini yediğim Arjantin restauranti yada bir yemek sever için kutsal bir tapınmak gibidir."}, {"usuario": "Antonela Montenegro", "estrellas": 5, "fecha": "2026-04-14", "reseñas_del_usuario": 25, "texto": "Las carnes 10/10 sin embargo se demoraron mucho en nuestro servicio, a pesar que tuvimos una reserva desde hace 2 meses, volvería a ir de igual manera, vale la pena!"}, {"usuario": "Raul Roque", "estrellas": 4, "fecha": "2026-05-07", "reseñas_del_usuario": 4, "texto": "Excelente restaurante com boas instalações e serviço perfeito e muito atencioso!!!<br>A comida é muito boa para quem gosta de carne.....<br>Carta de vinhos fantástica!"}, {"usuario": "Mariano García", "estrellas": 4, "fecha": "2026-04-30", "reseñas_del_usuario": 6, "texto": "La comida es un 10 , la atención un 20 , y el lugar cómodo , bajo una estrella porque los precios están altísimos , no digo que no lo vale , sino que se encuentra inaccesible para muchas personas , fuimos a comer 2 y gastamos 296 mil pesos , después el resto es hermoso , pero podrían hacer menú un poco más accesible para que más gente los pueda conocer"}, {"usuario": "Usuário do Google", "estrellas": 3, "fecha": "2026-04-07", "reseñas_del_usuario": 19, "texto": "Não fui bem tratado no restaurante. Estava muito frio e haviam mesas disponíveis na parte interior, no entanto a garçonete não fez questão de oferecer a mesa, mesmo quando reclamamos do frio! A comida é boa mas nada de mais, pelo preço esperava mais!"}, {"usuario": "Dave Mariani", "estrellas": 3, "fecha": "2026-03-29", "reseñas_del_usuario": 717, "texto": "Way overpriced for the town, steaks were average.  Apps were weak.  The horse salami was below average.  Wait staff was slow and uneducated.  Breads were great.  Steaks at javis and value was better."}, {"usuario": "horacio deza", "estrellas": 2, "fecha": "2026-03-31", "reseñas_del_usuario": 6, "texto": "Es lugar para turistas. Hay otros lugares mejores. Más económicos y con carne de la misma y mejor calidad. Sobreprecio en todo. No iría nuevamente."}, {"usuario": "Rodrigo Magalhães Tabarez", "estrellas": 1, "fecha": "2026-05-10", "reseñas_del_usuario": 2, "texto": "PODEM FUGIR DESTE! Já foi bom um dia. Serviço pessimo (com erro de ponto de carne), garçons despreparados para atender a restrição alimentícia e além de tudo preço abusivo e se n bastasse isso ainda fizeram a cobrança da cobrança on line por não comparecimento no estabelecimento, e agora teremos mais um dor de cabeça para ressarcirmos o dinheiro"}], "temas": [{"nombre": "Calidad de la carne", "descripcion": "Características, sabor, textura, punto de cocción y frescura de los cortes de carne ofrecidos", "palabras_clave": ["carne", "bife", "asado", "entrecot", "ojo de bife", "entraña", "chorizo", "morcilla", "tierna", "jugosa", "cocción", "punto", "sabor", "marmoleo", "carne cruda", "carne dura", "carne seca"], "menciones": 527, "sentimiento_pct": {"positivo": 77.6, "negativo": 15.7, "neutro": 1.3, "mixto": 5.3}, "sentimiento_pct_ponderado": {"positivo": 78.1, "negativo": 14.8, "neutro": 1.2, "mixto": 5.9}, "score_0_100": 80.9, "score_0_100_ponderado": 81.6, "ejemplos": {"positivo": "La carne estaba jugosa, bien cocida al punto que pedí y se deshacía en la boca.", "negativo": "El bife llegó duro como una suela y frío, una decepción total.", "neutro": "Nos sirvieron carne de res con las características típicas del lugar.", "mixto": "El lomo estaba excelente pero el asado vino un poco seco."}}, {"nombre": "Atención y servicio", "descripcion": "Calidad del servicio prestado por meseros, camareros y personal, atención al cliente, profesionalismo y cortesía", "palabras_clave": ["servicio", "atención", "mozo", "camarero", "mesero", "profesional", "amable", "cordial", "atento", "desatento", "impecable", "lento", "rápido", "personalizado", "impersonal", "rudo", "educado"], "menciones": 477, "sentimiento_pct": {"positivo": 73.6, "negativo": 20.8, "neutro": 0.4, "mixto": 5.2}, "sentimiento_pct_ponderado": {"positivo": 75.5, "negativo": 19.3, "neutro": 0.4, "mixto": 4.7}, "score_0_100": 76.4, "score_0_100_ponderado": 78.0, "ejemplos": {"positivo": "Los mozos fueron atentos, cordiales y pendientes de todo sin ser invasivos.", "negativo": "Esperamos 20 minutos para que alguien nos tomara el pedido y se notaba que no les importaba.", "neutro": "El personal cumplió con su función de traer los platos y refill de agua.", "mixto": "Al principio fuimos bien atendidos pero después desaparecieron cuando necesitábamos algo."}}, {"nombre": "Experiencia general y reputación", "descripcion": "Impresión general de la visita, cumplimiento de expectativas, reputación internacional y relación con la fama del lugar", "palabras_clave": ["experiencia", "memorable", "expectativas", "hype", "fama", "sobrevalorado", "Michelin", "turista", "trap", "reputación", "decepción", "extraordinario", "injustificado"], "menciones": 373, "sentimiento_pct": {"positivo": 70.0, "negativo": 24.1, "neutro": 0.8, "mixto": 5.1}, "sentimiento_pct_ponderado": {"positivo": 71.3, "negativo": 22.7, "neutro": 0.9, "mixto": 5.1}, "score_0_100": 73.0, "score_0_100_ponderado": 74.3, "ejemplos": {"positivo": "Cumplió y superó todas mis expectativas, ahora entiendo por qué es tan recomendado.", "negativo": "Una decepción total, no justifica para nada la fama que tiene.", "neutro": "Tuvimos una experiencia normal, nada del otro mundo pero tampoco malo.", "mixto": "Algunos detalles fueron excelentes pero en general no llegó a las expectativas que generaba su reputación."}}, {"nombre": "Ambiente y comodidad", "descripcion": "Atmósfera del lugar, decoración, temperatura, espacio entre mesas, ruido y confort general", "palabras_clave": ["ambiente", "clima", "frío", "calefacción", "espacio", "mesas pegadas", "apto", "confortable", "incómodo", "ruido", "decoración", "elegancia", "bullicio", "oscuro", "acogedor"], "menciones": 211, "sentimiento_pct": {"positivo": 61.1, "negativo": 35.1, "neutro": 0.9, "mixto": 2.8}, "sentimiento_pct_ponderado": {"positivo": 62.3, "negativo": 33.5, "neutro": 0.8, "mixto": 3.5}, "score_0_100": 63.0, "score_0_100_ponderado": 64.5, "ejemplos": {"positivo": "El lugar tiene una atmósfera acogedora, buena música de fondo y las mesas están bien espaciadas.", "negativo": "Estaba abarrotado, hacía un calor infernal y no se podía ni conversar de tanta bulla.", "neutro": "El restaurante es funcional, con buena iluminación y mesas cómodas.", "mixto": "Hermosa decoración pero las sillas son incómodas y el lugar estaba muy ruidoso esa noche."}}, {"nombre": "Acompañamientos y extras", "descripcion": "", "palabras_clave": ["acompañamiento", "papas fritas", "puré", "ensalada", "verduras", "boniato", "pan", "chimichurri", "provoleta", "acelga", "empanada", "guarnición", "calabaza", "carpaccio"], "menciones": 203, "sentimiento_pct": {"positivo": 75.4, "negativo": 19.2, "neutro": 1.0, "mixto": 4.4}, "sentimiento_pct_ponderado": {"positivo": 76.6, "negativo": 18.0, "neutro": 0.9, "mixto": 4.4}, "score_0_100": 78.1, "score_0_100_ponderado": 79.2, "ejemplos": {"positivo": "Las guarniciones eran creativas, frescas y complementaban perfecto con la carne.", "negativo": "Las papas llegaron frías y los vegetales parecían recalentados.", "neutro": "Vinieron con guarniciones estándar: papas y ensalada.", "mixto": "La ensalada estaba excelente pero las papas al horno medio crudas."}}, {"nombre": "Postres y bebidas", "descripcion": "", "palabras_clave": ["vino", "Malbec", "champagne", "prosecco", "dulce de leche", "helado", "flan", "crepes", "postre", "bebidas", "cava", "bodega", "bebida", "licor", "cerveza"], "menciones": 190, "sentimiento_pct": {"positivo": 85.8, "negativo": 11.6, "neutro": 1.1, "mixto": 1.6}, "sentimiento_pct_ponderado": {"positivo": 87.8, "negativo": 9.7, "neutro": 0.8, "mixto": 1.8}, "score_0_100": 87.1, "score_0_100_ponderado": 89.1, "ejemplos": {"positivo": "Los postres caseros eran deliciosos y la carta de vinos tiene opciones para todos los gustos.", "negativo": "El postre era una porción minúscula y el vino que pedimos estaba oxidado.", "neutro": "Tienen postres y una selección de bebidas disponibles en la carta.", "mixto": "Las cervezas bien fría pero los postres de la casa están un poco aburridos."}}, {"nombre": "Precios y valor", "descripcion": "Costo de los platos, relación precio-calidad, cargos adicionales y accesibilidad económica", "palabras_clave": ["precio", "caro", "carisimo", "valor", "costo", "relación precio-calidad", "accesible", "inaccesible", "couvert", "caro", "elevado", "abusivo", "excesivo", "económico"], "menciones": 186, "sentimiento_pct": {"positivo": 18.3, "negativo": 68.3, "neutro": 1.1, "mixto": 12.4}, "sentimiento_pct_ponderado": {"positivo": 18.7, "negativo": 66.2, "neutro": 1.0, "mixto": 14.2}, "score_0_100": 25.1, "score_0_100_ponderado": 26.3, "ejemplos": {"positivo": "Muy buena relación precio-calidad, salimos conformes y sin sentir que nos robaron.", "negativo": "Carísimo para la calidad que ofrecen, además te cobran hasta el pan de entrada.", "neutro": "Los precios son acordes a lo que es un restaurante de este tipo.", "mixto": "Las carnes tienen buenos precios pero los vinos y postres están muy inflados."}}, {"nombre": "Reservas y acceso", "descripcion": "", "palabras_clave": ["reserva", "reservación", "espera", "cancelación", "disponibilidad", "cupos", "anticipación", "acceso", "fila", "demora", "tiempo de espera", "walk-in"], "menciones": 117, "sentimiento_pct": {"positivo": 29.1, "negativo": 48.7, "neutro": 17.9, "mixto": 4.3}, "sentimiento_pct_ponderado": {"positivo": 32.4, "negativo": 44.1, "neutro": 19.3, "mixto": 4.2}, "score_0_100": 40.2, "score_0_100_ponderado": 44.1, "ejemplos": {"positivo": "Conseguí mesa fácil por teléfono y fue rápido, muy ágil el sistema de reservas.", "negativo": "Imposible conseguir reserva, llamé varias veces y nada, terrible la gestión.", "neutro": "Las reservas se hacen online o por teléfono sin inconvenientes.", "mixto": "Rápido para reservar pero llegamos y nos hicieron esperar igual aunque teníamos reserva confirmada."}}, {"nombre": "Recepción y bienvenida", "descripcion": "", "palabras_clave": ["recepción", "bienvenida", "champagne", "empanada", "cortesía", "hospitalidad", "anfitrión", "anfitriona", "prosecco", "sopa", "primer contacto", "espera", "amable", "soberbio", "grosero"], "menciones": 98, "sentimiento_pct": {"positivo": 84.7, "negativo": 14.3, "neutro": 0.0, "mixto": 1.0}, "sentimiento_pct_ponderado": {"positivo": 87.5, "negativo": 12.0, "neutro": 0.0, "mixto": 0.5}, "score_0_100": 85.2, "score_0_100_ponderado": 87.8, "ejemplos": {"positivo": "Nos recibieron con una sonrisa genuina, nos hicieron sentir bienvenidos desde el primer momento.", "negativo": "Nadie nos recibió en la puerta, nos miraron con cara de fastidio como si fuéramos un incordio.", "neutro": "Nos saludaron al entrar y nos llevaron a la mesa.", "mixto": "La anfitriona fue amable pero después el mozo fue bastante desinteresado."}}]};
+
+function scoreColor(s){ return `hsl(${(s/100)*120},70%,45%)`; }
+
+// Header
+document.getElementById('title').textContent = DATA.client_name;
+document.getElementById('subtitle').textContent = (DATA.place_name||'') + ' · Análisis de reseñas de Google Maps';
+document.getElementById('mode').textContent = DATA.modo || '';
+document.getElementById('resumen').textContent = DATA.resumen || '';
+document.getElementById('cuatro').textContent = DATA.resumen_4_estrellas || '';
+
+// Stats
+const stats = [
+  [DATA.rating_global ?? '-', 'Rating global en Google'],
+  [(DATA.total_reviews_en_google ?? '-').toLocaleString('es-AR'), 'Reseñas totales en Google'],
+  [DATA.reviews_analizadas ?? '-', 'Reseñas analizadas'],
+  [DATA.temas.length, 'Temas mostrados'],
+];
+document.getElementById('stats').innerHTML = stats.map(s =>
+  `<div class="stat"><div class="n">${s[0]}</div><div class="l">${s[1]}</div></div>`).join('');
+
+// Nube de temas
+const maxM = Math.max(...DATA.temas.map(t => t.menciones), 1);
+document.getElementById('cloud').innerHTML = DATA.temas.map(t => {
+  const size = 16 + (t.menciones/maxM)*40;
+  return `<span style="font-size:${size}px;color:${scoreColor(t.score_0_100)}"
+            title="${t.menciones} menciones · score ${t.score_0_100}">${t.nombre}</span>`;
+}).join('');
+
+// Distribución por estrellas
+const dist = DATA.distribucion_estrellas || {};
+const totalD = Object.values(dist).reduce((a,b)=>a+b,0) || 1;
+const maxD = Math.max(...Object.values(dist), 1);
+const starColor = {5:'#2ecc71',4:'#7ec850',3:'#f1c40f',2:'#e67e22',1:'#e74c3c'};
+document.getElementById('stars').innerHTML = [5,4,3,2,1].map(s => {
+  const v = dist[s]||0;
+  const pct = (100*v/totalD).toFixed(1);
+  const w = (100*v/maxD).toFixed(1);
+  return `<div class="star-row">
+            <div class="star-lbl">${s} ★</div>
+            <div class="star-track"><div class="star-fill" style="width:${w}%;background:${starColor[s]}"></div></div>
+            <div class="star-val">${v} reseñas (${pct}%)</div>
+          </div>`;
+}).join('');
+
+// Sentimiento por tema
+const tip = document.getElementById('tip');
+function showTip(t, e){
+  const ex = t.ejemplos || {};
+  tip.innerHTML = `<h4>Qué se considera en "${t.nombre}"</h4>
+    <div class="ex"><span class="tag" style="color:var(--pos)">Positivo:</span> ${ex.positivo||'—'}</div>
+    <div class="ex"><span class="tag" style="color:var(--mix)">Mixto:</span> ${ex.mixto||'—'}</div>
+    <div class="ex"><span class="tag" style="color:var(--neu)">Neutro:</span> ${ex.neutro||'—'}</div>
+    <div class="ex"><span class="tag" style="color:var(--neg)">Negativo:</span> ${ex.negativo||'—'}</div>`;
+  tip.style.display = 'block';
+  moveTip(e);
+}
+function moveTip(e){
+  const pad = 16, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if (x + w > window.innerWidth)  x = e.clientX - w - pad;
+  if (y + h > window.innerHeight) y = e.clientY - h - pad;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function hideTip(){ tip.style.display = 'none'; }
+
+const themes = document.getElementById('themes');
+DATA.temas.forEach(t => {
+  const p = t.sentimiento_pct;
+  const seg = (val,v) => val > 0 ? `<div style="width:${val}%;background:var(--${v})">${val>=8?val+'%':''}</div>` : '';
+  const div = document.createElement('div');
+  div.className = 'theme';
+  div.innerHTML = `
+    <div class="theme-head">
+      <span class="theme-name">${t.nombre}</span>
+      <span class="theme-meta">${t.menciones} menciones &middot;
+        <span class="score" style="color:${scoreColor(t.score_0_100)}">${t.score_0_100}%</span></span>
+    </div>
+    <div class="theme-desc">${t.descripcion||''}</div>
+    <div class="bar">${seg(p.positivo,'pos')}${seg(p.mixto,'mix')}${seg(p.neutro,'neu')}${seg(p.negativo,'neg')}</div>
+    ${t.palabras_clave && t.palabras_clave.length ? '<div class="kw">Incluye: ' + t.palabras_clave.join(', ') + '</div>' : ''}
+  `;
+  div.addEventListener('mouseenter', e => showTip(t, e));
+  div.addEventListener('mousemove', moveTip);
+  div.addEventListener('mouseleave', hideTip);
+  themes.appendChild(div);
+});
+
+// Carrusel de comentarios reales
+const coms = DATA.comentarios_reales || [];
+const car = document.getElementById('carousel');
+let ci = 0;
+const star = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+function renderCar(){
+  if (!coms.length){ car.innerHTML = '<div class="car-text">Sin comentarios.</div>'; return; }
+  const c = coms[ci];
+  car.innerHTML = `
+    <div class="car-stars">${star(c.estrellas)}</div>
+    <div class="car-text">“${c.texto}”</div>
+    <div class="car-meta">— ${c.usuario || 'Usuario de Google'} &middot; ${c['reseñas_del_usuario'] ?? 0} reseñas &middot; ${c.fecha || ''}</div>
+    <div class="car-nav">
+      <button class="car-btn" id="prev">‹ Anterior</button>
+      <div class="car-dots">${coms.map((_,i)=>`<span class="car-dot ${i===ci?'active':''}" data-i="${i}"></span>`).join('')}</div>
+      <button class="car-btn" id="next">Siguiente ›</button>
+    </div>`;
+  document.getElementById('prev').onclick = () => { ci = (ci - 1 + coms.length) % coms.length; renderCar(); };
+  document.getElementById('next').onclick = () => { ci = (ci + 1) % coms.length; renderCar(); };
+  car.querySelectorAll('.car-dot').forEach(d => d.onclick = () => { ci = +d.dataset.i; renderCar(); });
+}
+renderCar();
+
+// Conclusiones
+const nota = DATA.conclusiones_nota ? `<div class="nota">${DATA.conclusiones_nota}</div>` : '';
+document.getElementById('conclusiones').innerHTML = nota + (DATA.conclusiones||[]).map((c,i) =>
+  `<div class="concl">
+     <div class="concl-head"><b>${i+1}. ${c.titulo}</b>${c.impacto_estimado?`<span class="impacto">${c.impacto_estimado}</span>`:''}</div>
+     <span class="det">${c.detalle}</span>
+   </div>`).join('');
+</script>
+</body>
+</html>

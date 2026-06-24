@@ -1,0 +1,13 @@
+# Secretos — NUNCA subir
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Datos crudos scrapeados (no se redistribuyen)
+data/raw/
+data/don-julio_reviews.json
+data/sample.txt
