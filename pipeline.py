@@ -47,6 +47,7 @@ def collect(query, outscraper_key, reviews_limit=100, sort="newest", language="e
     results = client.google_maps_reviews(
         q, reviews_limit=reviews_limit, limit=1, sort=sort,
         language=language, async_request=False,
+        ignore_empty=True,  # traer solo reseñas CON texto (las de solo estrellas no se analizan)
     )
     if not results:
         raise RuntimeError("No se encontró el negocio. Probá con el link completo o el nombre.")
