@@ -169,6 +169,41 @@ Las conclusiones deben ser 4-6 quick wins accionables de corto plazo para subir 
         return {}
 
 
+def translate_batch(client, batch):
+    """Detecta idioma y traduce al español las reseñas que no lo están."""
+    items = "\n".join(f'{i}. "{r["texto"]}"' for i, r in enumerate(batch))
+    prompt = f"""Para cada reseña numerada, detectá el idioma (código ISO: es, en, pt, it, fr, de, ...).
+Si NO está en español, traducila al español rioplatense (natural, fiel). Si ya está en español,
+devolvé "traduccion": null.
+
+Devolvé SOLO un JSON: {{"0": {{"idioma": "en", "traduccion": "..."}}, "1": {{"idioma": "es", "traduccion": null}}, ...}}
+
+Reseñas:
+{items}
+"""
+    return call_json(client, prompt, max_tokens=8000)
+
+
+def translate_reviews(client, reviews, batch_size=12):
+    """Traduce todas las reseñas (de a tandas). Devuelve lista alineada con reviews."""
+    out = [{"idioma": None, "traduccion": None} for _ in reviews]
+    for start in range(0, len(reviews), batch_size):
+        batch = reviews[start:start + batch_size]
+        try:
+            res = translate_batch(client, batch)
+        except Exception as e:  # noqa: BLE001
+            print(f"  (traducción tanda {start} falló: {e}; se saltea)")
+            continue
+        for i in range(len(batch)):
+            tag = res.get(str(i)) or {}
+            out[start + i] = {
+                "idioma": tag.get("idioma"),
+                "traduccion": (tag.get("traduccion") or None),
+            }
+        print(f"  traducidas {min(start + batch_size, len(reviews))}/{len(reviews)}...")
+    return out
+
+
 def select_real_comments(reviews, plan=None):
     """Elige comentarios reales (verbatim) variados por estrellas, para el carrusel."""
     if plan is None:
@@ -218,6 +253,7 @@ def main():
     menciones = defaultdict(int)
     detractores = defaultdict(int)  # reseñas con crítica negativa y < 5 estrellas (para el impacto)
     valid_themes = set(counts.keys())
+    tags_por_review = [[] for _ in reviews]  # etiquetas {tema, sentimiento} de cada reseña
 
     for start in range(0, len(reviews), BATCH_SIZE):
         batch = reviews[start:start + BATCH_SIZE]
@@ -234,6 +270,7 @@ def main():
                     counts[tema][sent] += 1
                     wcounts[tema][sent] += weight(r.get("reseñas_del_usuario"))
                     menciones[tema] += 1
+                    tags_por_review[start + i].append({"tema": tema, "sentimiento": sent})
                     if sent == "negativo" and (r.get("estrellas") or 5) < 5:
                         detractores[tema] += 1
         done = min(start + BATCH_SIZE, len(reviews))
@@ -246,6 +283,23 @@ def main():
 
     def score(p):  # 0 (peor) a 100 (mejor): pos=1, mixto=0.5, neutro=0.5, neg=0
         return round(p["positivo"] + 0.5 * (p["mixto"] + p["neutro"]), 1)
+
+    print("\nTraduciendo al español las reseñas en otros idiomas (de a tandas)...")
+    traducciones = translate_reviews(client, reviews)
+
+    # Datos por reseña (para que el dashboard filtre y recalcule en vivo)
+    reviews_clasificadas = []
+    for r, tags, tr in zip(reviews, tags_por_review, traducciones):
+        reviews_clasificadas.append({
+            "fecha": r.get("fecha"),
+            "estrellas": r.get("estrellas"),
+            "usuario": r.get("usuario"),
+            "reseñas_del_usuario": r.get("reseñas_del_usuario"),
+            "texto": r.get("texto"),
+            "idioma": tr.get("idioma"),
+            "traduccion": tr.get("traduccion"),
+            "tags": tags,
+        })
 
     print("\nGenerando ejemplos por tema y textos narrativos...")
     ejemplos = generate_examples(client, temas)
@@ -298,6 +352,7 @@ def main():
         "Son estimaciones independientes y NO sumables: una misma reseña suele criticar varias cosas."
     )
 
+    fechas = [r["fecha"] for r in reviews if r.get("fecha")]
     out = {
         "client_name": data["client_name"],
         "place_name": data.get("place_name"),
@@ -305,13 +360,14 @@ def main():
         "total_reviews_en_google": data.get("total_reviews_en_google"),
         "reviews_analizadas": len(reviews),
         "rating_promedio_analizadas": rating_prom,
+        "fecha_referencia": max(fechas) if fechas else None,
         "distribucion_estrellas": dist,
         "resumen": narr.get("resumen", ""),
         "resumen_4_estrellas": narr.get("resumen_4_estrellas", ""),
         "conclusiones_nota": nota,
         "conclusiones": conclusiones,
-        "comentarios_reales": select_real_comments(reviews),
         "temas": temas_out,
+        "reviews_clasificadas": reviews_clasificadas,
     }
     out_path = f"data/{slug}_analysis.json"
     with open(out_path, "w", encoding="utf-8") as f:
