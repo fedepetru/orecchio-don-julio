@@ -41,7 +41,22 @@ Análisis sobre 721 reseñas con texto. Hallazgos principales:
 | Atención y servicio | 477 | 76 |
 | Precios y valor | 186 | **25** ← principal dolor |
 
-## Cómo correrlo
+## App web (Streamlit)
+
+Además del pipeline por línea de comandos, hay una **app web** (`app.py`): se pega el
+link de Google Maps de un negocio y genera el reporte solo. Tiene contraseña de acceso y
+un tope de reseñas por análisis para controlar el costo.
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py     # lee las claves del .env
+```
+
+**Deploy en Streamlit Community Cloud:** conectar este repo en https://share.streamlit.io,
+archivo principal `app.py`, y cargar en *Secrets*: `OUTSCRAPER_API_KEY`, `ANTHROPIC_API_KEY`,
+`APP_PASSWORD` y `REVIEW_CAP`.
+
+## Cómo correr el pipeline por CLI
 
 ```bash
 pip install -r requirements.txt
