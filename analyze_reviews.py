@@ -144,7 +144,6 @@ def generate_narratives(client, temas_out, four_star_texts, client_name):
         for t in temas_out
     ]
     muestra4 = "\n".join(f"- {t}" for t in four_star_texts[:60])
-    nombres = [t["nombre"] for t in temas_out]
     prompt = f"""Sos consultor de experiencia del cliente y analizaste las reseñas de "{client_name}".
 
 Resultados por tema (score 0=peor, 100=mejor): {json.dumps(resumen_temas, ensure_ascii=False)}
@@ -155,18 +154,36 @@ Reseñas de 4 estrellas (las más equilibradas y útiles):
 Devolvé SOLO un JSON con:
 {{
   "resumen": "un párrafo (5-7 oraciones) sobre el clima general de las reseñas",
-  "resumen_4_estrellas": "un párrafo sobre qué critican constructivamente quienes pusieron 4 estrellas",
-  "conclusiones": [
-    {{"titulo": "...", "detalle": "...", "tema_asociado": "uno de: {nombres}"}}
-  ]
+  "resumen_4_estrellas": "un párrafo sobre qué critican constructivamente quienes pusieron 4 estrellas"
 }}
-Las conclusiones deben ser 4-6 quick wins accionables de corto plazo para subir las valoraciones.
-"tema_asociado" es el tema principal que ese quick win mejoraría (elegí uno de la lista).
 """
     try:
         return call_json(client, prompt, max_tokens=3000)
     except Exception:  # noqa: BLE001
         return {}
+
+
+def extract_negative_subtopics(client, neg_texts, top=6):
+    """Detecta los sub-temas negativos más recurrentes (etiquetas cortas) y su frecuencia."""
+    if not neg_texts:
+        return []
+    sample = "\n".join(f"- {t}" for t in neg_texts[:120])
+    prompt = f"""Abajo hay reseñas con críticas negativas de un negocio.
+Identificá los SUB-TEMAS negativos más recurrentes: etiquetas cortas y concretas de la queja,
+de 2 a 4 palabras (ej: "precios altos", "esperas largas", "trato distante", "carne sin sabor",
+"mesas apretadas"). NO sugieras soluciones, solo nombrá el problema.
+Estimá en cuántas de estas reseñas aparece cada sub-tema.
+
+Devolvé SOLO un JSON: {{"subtemas": [{{"subtema": "...", "menciones": N}}, ...]}}
+ordenado de mayor a menor frecuencia, máximo {top} sub-temas.
+
+Reseñas:
+{sample}
+"""
+    try:
+        return call_json(client, prompt, max_tokens=1500).get("subtemas", [])
+    except Exception:  # noqa: BLE001
+        return []
 
 
 def translate_batch(client, batch):
@@ -333,24 +350,17 @@ def main():
     n = len(estrellas) or 1
     rating_prom = round(sum(estrellas) / n, 2)
 
-    # Resumen general, resumen de 4 estrellas y conclusiones
+    # Resumen general y resumen de 4 estrellas
     four_star_texts = [r["texto"] for r in reviews if r.get("estrellas") == 4]
     narr = generate_narratives(client, temas_out, four_star_texts, data["client_name"])
 
-    # Impacto estimado por conclusión: +1 estrella a los detractores del tema asociado
-    conclusiones = narr.get("conclusiones", [])
-    for c in conclusiones:
-        d = detractores.get(c.get("tema_asociado"), 0)
-        delta = round(d / n, 2)
-        c["impacto_delta"] = delta
-        c["impacto_estimado"] = f"+{delta:.2f} ★"
-    conclusiones.sort(key=lambda x: x.get("impacto_delta", 0), reverse=True)
-
-    nota = (
-        f"Impacto estimado = cuánto subiría el rating promedio de las {n} reseñas analizadas "
-        f"(hoy {rating_prom} ★) si quienes criticaron ese punto hubieran sumado +1 estrella. "
-        "Son estimaciones independientes y NO sumables: una misma reseña suele criticar varias cosas."
-    )
+    # Sub-temas negativos más recurrentes (qué mejorar, sin sugerir soluciones)
+    neg_texts = [
+        (rc.get("traduccion") or rc.get("texto"))
+        for rc in reviews_clasificadas
+        if any(t["sentimiento"] == "negativo" for t in rc["tags"])
+    ]
+    subtemas_negativos = extract_negative_subtopics(client, neg_texts)
 
     fechas = [r["fecha"] for r in reviews if r.get("fecha")]
     out = {
@@ -364,8 +374,7 @@ def main():
         "distribucion_estrellas": dist,
         "resumen": narr.get("resumen", ""),
         "resumen_4_estrellas": narr.get("resumen_4_estrellas", ""),
-        "conclusiones_nota": nota,
-        "conclusiones": conclusiones,
+        "subtemas_negativos": subtemas_negativos,
         "temas": temas_out,
         "reviews_clasificadas": reviews_clasificadas,
     }

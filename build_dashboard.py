@@ -53,7 +53,8 @@ TEMPLATE = r"""<!DOCTYPE html>
   .star-fill { height:100%; border-radius:6px; }
   .star-val { width:140px; font-size:13px; color:var(--muted); }
   /* temas */
-  .theme { background:var(--card); border-radius:12px; padding:16px 20px; margin-bottom:12px; cursor:default; }
+  .theme { background:var(--card); border-radius:12px; padding:16px 20px; margin-bottom:12px; cursor:pointer; }
+  .theme:hover { outline:1px solid #2a2f3a; }
   .theme-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; }
   .theme-name { font-size:17px; font-weight:600; }
   .theme-desc { color:var(--muted); font-size:13px; margin:2px 0 10px; }
@@ -88,13 +89,16 @@ TEMPLATE = r"""<!DOCTYPE html>
   .impacto { background:var(--accent); color:#0a0a0a; font-weight:700; font-size:13px;
              padding:3px 11px; border-radius:20px; white-space:nowrap; }
   .concl span.det { color:var(--muted); font-size:14px; line-height:1.5; }
-  /* tooltip */
-  #tip { position:fixed; pointer-events:none; z-index:99; background:#0b0d12; border:1px solid #2a2f3a;
-         border-radius:10px; padding:12px 14px; max-width:340px; font-size:12.5px; line-height:1.45;
-         box-shadow:0 8px 24px rgba(0,0,0,.5); display:none; }
-  #tip h4 { margin:0 0 8px; font-size:13px; }
-  #tip .ex { margin:6px 0; }
-  #tip .tag { font-weight:700; }
+  /* comentarios reales por tema (desplegable al hacer clic) */
+  .toggle { color:var(--accent); font-size:13px; margin-top:10px; font-weight:600; }
+  .theme-comments { display:none; margin-top:12px; border-top:1px solid #23262e; padding-top:10px; }
+  .theme.open .theme-comments { display:block; }
+  .rc { margin:10px 0; padding:10px 12px; background:var(--card2); border-radius:8px; }
+  .rc-text { font-size:14px; line-height:1.5; margin:4px 0; }
+  .rc-trad { font-size:13px; color:var(--muted); border-left:2px solid var(--accent); padding-left:8px; margin:6px 0; }
+  .rc-meta { color:var(--muted); font-size:12px; }
+  .chip-sent { display:inline-block; font-size:11px; font-weight:700; color:#0a0a0a;
+               padding:2px 9px; border-radius:20px; }
 </style>
 </head>
 <body>
@@ -130,17 +134,15 @@ TEMPLATE = r"""<!DOCTYPE html>
     <span><i style="background:var(--neg)"></i>Negativo</span>
     <span style="margin-left:auto">Score: 0% (peor) &rarr; 100% (mejor)</span>
   </div>
-  <div class="hint" style="margin-bottom:12px">Pasá el mouse por una barra para ver qué se considera positivo, mixto, neutro o negativo en ese tema.</div>
+  <div class="hint" style="margin-bottom:12px">Hacé clic en un tema para ver 5 comentarios reales sobre ese tópico, con su clasificación.</div>
   <div id="themes"></div>
 
   <h2>4 estrellas <span class="hint">— la crítica más honesta (período completo)</span></h2>
   <div class="card"><p class="resumen" id="cuatro"></p></div>
 
-  <h2>Conclusiones <span class="hint">— quick wins, impacto recalculado según el filtro</span></h2>
-  <div id="conclusiones"></div>
+  <h2>Puntos a mejorar <span class="hint">— sub-temas negativos más mencionados (período completo)</span></h2>
+  <div id="amejorar"></div>
 </div>
-
-<div id="tip"></div>
 
 <script>
 const DATA = __DATA__;
@@ -197,20 +199,35 @@ function aggregate(revs){
   return {temas, detr, dist, n:revs.length, ratingProm: cnt ? +(sum/cnt).toFixed(2) : 0};
 }
 
-// ---- tooltip ----
-const tip = document.getElementById("tip");
-function showTip(t,e){ const ex=t.ejemplos||{};
-  tip.innerHTML = `<h4>Qué se considera en "${t.nombre}"</h4>
-    <div class="ex"><span class="tag" style="color:var(--pos)">Positivo:</span> ${ex.positivo||"—"}</div>
-    <div class="ex"><span class="tag" style="color:var(--mix)">Mixto:</span> ${ex.mixto||"—"}</div>
-    <div class="ex"><span class="tag" style="color:var(--neu)">Neutro:</span> ${ex.neutro||"—"}</div>
-    <div class="ex"><span class="tag" style="color:var(--neg)">Negativo:</span> ${ex.negativo||"—"}</div>`;
-  tip.style.display="block"; moveTip(e); }
-function moveTip(e){ const pad=16,w=tip.offsetWidth,h=tip.offsetHeight;
-  let x=e.clientX+pad,y=e.clientY+pad;
-  if(x+w>innerWidth)x=e.clientX-w-pad; if(y+h>innerHeight)y=e.clientY-h-pad;
-  tip.style.left=x+"px"; tip.style.top=y+"px"; }
-function hideTip(){ tip.style.display="none"; }
+// ---- comentarios reales por tema ----
+const SENT_COLOR = {positivo:"var(--pos)", negativo:"var(--neg)", neutro:"var(--neu)", mixto:"var(--mix)"};
+const SENT_LABEL = {positivo:"Positivo", negativo:"Negativo", neutro:"Neutro", mixto:"Mixto"};
+function esc(s){ return (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function cut(s, n){ s = s||""; return s.length > n ? s.slice(0, n).trim() + "…" : s; }
+
+function themeComments(revs, theme, k){
+  const groups = {negativo:[], positivo:[], mixto:[], neutro:[]};
+  revs.forEach(r => (r.tags||[]).forEach(t => {
+    if (t.tema === theme && groups[t.sentimiento]) groups[t.sentimiento].push({...r, _sent:t.sentimiento});
+  }));
+  Object.values(groups).forEach(g => g.sort((a,b)=>(b.texto||"").length-(a.texto||"").length));
+  const out = []; const order = ["negativo","positivo","mixto","neutro"]; let added = true;
+  while (out.length < k && added){
+    added = false;
+    for (const s of order){ if (groups[s].length && out.length < k){ out.push(groups[s].shift()); added = true; } }
+  }
+  return out;
+}
+function commentHTML(c){
+  const trad = (c.traduccion && c.idioma && c.idioma !== "es")
+    ? `<div class="rc-trad"><b>es:</b> ${esc(cut(c.traduccion, 280))}</div>` : "";
+  return `<div class="rc">
+    <span class="chip-sent" style="background:${SENT_COLOR[c._sent]}">${SENT_LABEL[c._sent]}</span>
+    <div class="rc-text">“${esc(cut(c.texto, 280))}”</div>
+    ${trad}
+    <div class="rc-meta">${star(c.estrellas)} &middot; ${esc(c.usuario||"Usuario")} &middot; ${c.fecha||""}</div>
+  </div>`;
+}
 
 // ---- carrusel ----
 let carPool = [];
@@ -276,6 +293,9 @@ function render(){
   visibles.forEach(t => {
     const p = t.sentimiento_pct;
     const seg = (val,v) => val>0 ? `<div style="width:${val}%;background:var(--${v})">${val>=8?val+"%":""}</div>` : "";
+    const coms = themeComments(revs, t.nombre, 5);
+    const comsHTML = coms.length ? coms.map(commentHTML).join("")
+      : '<div class="empty">Sin comentarios para este filtro.</div>';
     const div = document.createElement("div"); div.className="theme";
     div.innerHTML = `
       <div class="theme-head"><span class="theme-name">${t.nombre}</span>
@@ -283,10 +303,14 @@ function render(){
           <span class="score" style="color:${scoreColor(t.score_0_100)}">${t.score_0_100}%</span></span></div>
       <div class="theme-desc">${t.descripcion||""}</div>
       <div class="bar">${seg(p.positivo,"pos")}${seg(p.mixto,"mix")}${seg(p.neutro,"neu")}${seg(p.negativo,"neg")}</div>
-      ${t.palabras_clave&&t.palabras_clave.length?'<div class="kw">Incluye: '+t.palabras_clave.join(", ")+"</div>":""}`;
-    div.addEventListener("mouseenter", e=>showTip(t,e));
-    div.addEventListener("mousemove", moveTip);
-    div.addEventListener("mouseleave", hideTip);
+      ${t.palabras_clave&&t.palabras_clave.length?'<div class="kw">Incluye: '+t.palabras_clave.join(", ")+"</div>":""}
+      <div class="toggle">▾ Ver 5 comentarios reales</div>
+      <div class="theme-comments">${comsHTML}</div>`;
+    div.addEventListener("click", () => {
+      div.classList.toggle("open");
+      div.querySelector(".toggle").textContent = div.classList.contains("open")
+        ? "▴ Ocultar comentarios" : "▾ Ver 5 comentarios reales";
+    });
     themes.appendChild(div);
   });
 
@@ -294,17 +318,6 @@ function render(){
   carPool = revs.filter(r => r.texto && r.texto.length >= 40)
                 .sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||"")).slice(0, 40);
   ci = 0; renderCarousel();
-
-  // conclusiones (texto fijo, impacto recalculado por el filtro)
-  const nota = DATA.conclusiones_nota ? `<div class="nota">${DATA.conclusiones_nota}</div>` : "";
-  const cons = (DATA.conclusiones||[]).map(c => {
-    const delta = agg.n ? +(agg.detr[c.tema_asociado]/agg.n).toFixed(2) : 0;
-    return Object.assign({}, c, {dyn: delta});
-  }).sort((a,b)=>b.dyn-a.dyn);
-  document.getElementById("conclusiones").innerHTML = nota + cons.map((c,i) =>
-    `<div class="concl"><div class="concl-head"><b>${i+1}. ${c.titulo}</b>
-       <span class="impacto">+${c.dyn.toFixed(2)} ★</span></div>
-     <span class="det">${c.detalle}</span></div>`).join("");
 }
 
 // ---- UI estática ----
@@ -313,6 +326,16 @@ document.getElementById("subtitle").textContent = (DATA.place_name||"") + " · A
 document.getElementById("mode").textContent = DATA.modo || "";
 document.getElementById("resumen").textContent = DATA.resumen || "";
 document.getElementById("cuatro").textContent = DATA.resumen_4_estrellas || "";
+
+// Puntos a mejorar: sub-temas negativos más mencionados (estático, período completo)
+(function(){
+  const subs = (DATA.subtemas_negativos || []).slice(0, 5);
+  const nota = '<div class="nota">Los sub-temas negativos que más se repiten. Qué hacer al respecto queda a tu criterio.</div>';
+  document.getElementById("amejorar").innerHTML = nota + (subs.length
+    ? subs.map((s,i) => `<div class="concl"><div class="concl-head">
+        <b>${i+1}. ${esc(s.subtema)}</b><span class="impacto">${s.menciones} menciones</span></div></div>`).join("")
+    : '<div class="empty">No se detectaron sub-temas negativos relevantes.</div>');
+})();
 
 // chips de fecha
 const fdate = document.getElementById("fdate");

@@ -9,12 +9,14 @@ Secrets / variables necesarias:
 """
 
 import os
+from datetime import date
 
 import streamlit as st
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 import pipeline
+import pdf_report
 
 load_dotenv()
 
@@ -117,17 +119,31 @@ if st.button("Generar reporte", type="primary", disabled=(restantes <= 0 or demo
         nombre = meta.get("place_name") or "Negocio"
         cb(f"{len(reviews)} reseñas colectadas de «{nombre}». Analizando...", 0.15)
         analysis = pipeline.analyze(reviews, nombre, meta, ANTHROPIC_KEY, progress=cb)
-        cb("Generando el tablero...", 0.97)
+        cb("Generando el tablero y el PDF...", 0.97)
         html = pipeline.build_html(analysis)
+        pdf_bytes = pdf_report.build_pdf(analysis)
         prog.empty()
     except Exception as e:  # noqa: BLE001
         prog.empty()
         st.error(f"Hubo un error: {e}")
         st.stop()
 
-    st.success(f"✅ {analysis['reviews_analizadas']} reseñas analizadas de «{analysis.get('place_name')}»")
-    quedan = max(0, MAX_TRIES - st.session_state["uses"])
-    st.caption(f"🧪 Te quedan {quedan} prueba(s) de {MAX_TRIES} a modo de demostración.")
-    components.html(html, height=900, scrolling=True)
-    st.download_button("⬇️ Descargar el tablero (HTML)", data=html,
-                       file_name="dashboard.html", mime="text/html")
+    st.session_state["result"] = {
+        "html": html, "pdf": pdf_bytes,
+        "nombre": analysis.get("place_name"), "n": analysis["reviews_analizadas"],
+        "quedan": max(0, MAX_TRIES - st.session_state["uses"]),
+    }
+
+# ---- Resultado (persiste entre interacciones, p.ej. al descargar) ----
+res = st.session_state.get("result")
+if res:
+    slug = "".join(c if c.isalnum() else "-" for c in (res["nombre"] or "reporte").lower()).strip("-")
+    fecha = date.today().strftime("%Y-%m-%d")
+    st.success(f"✅ {res['n']} reseñas analizadas de «{res['nombre']}»")
+    st.caption(f"🧪 Te quedan {res['quedan']} prueba(s) de {MAX_TRIES} a modo de demostración.")
+    c1, c2 = st.columns(2)
+    c1.download_button("⬇️ Descargar PDF", data=res["pdf"],
+                       file_name=f"reporte-{slug}-{fecha}.pdf", mime="application/pdf")
+    c2.download_button("⬇️ Descargar tablero (HTML)", data=res["html"],
+                       file_name=f"reporte-{slug}-{fecha}.html", mime="text/html")
+    components.html(res["html"], height=900, scrolling=True)

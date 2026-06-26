@@ -155,16 +155,12 @@ def analyze(reviews_normalizadas, client_name, meta, anthropic_key, progress=Non
     four_star = [r["texto"] for r in reviews if r.get("estrellas") == 4]
     narr = AR.generate_narratives(client, temas_out, four_star, client_name)
 
-    conclusiones = narr.get("conclusiones", [])
-    for c in conclusiones:
-        delta = round(detractores.get(c.get("tema_asociado"), 0) / n, 2)
-        c["impacto_delta"] = delta
-        c["impacto_estimado"] = f"+{delta:.2f} ★"
-    conclusiones.sort(key=lambda x: x.get("impacto_delta", 0), reverse=True)
-
-    nota = (f"Impacto estimado = cuánto subiría el rating promedio de las {n} reseñas analizadas "
-            f"(hoy {rating_prom} ★) si quienes criticaron ese punto hubieran sumado +1 estrella. "
-            "Son estimaciones independientes y NO sumables.")
+    neg_texts = [
+        (rc.get("traduccion") or rc.get("texto"))
+        for rc in reviews_clasificadas
+        if any(t["sentimiento"] == "negativo" for t in rc["tags"])
+    ]
+    subtemas_negativos = AR.extract_negative_subtopics(client, neg_texts)
 
     fechas = [r["fecha"] for r in reviews if r.get("fecha")]
     say("Listo.", 1.0)
@@ -180,8 +176,7 @@ def analyze(reviews_normalizadas, client_name, meta, anthropic_key, progress=Non
         "distribucion_estrellas": dist,
         "resumen": narr.get("resumen", ""),
         "resumen_4_estrellas": narr.get("resumen_4_estrellas", ""),
-        "conclusiones_nota": nota,
-        "conclusiones": conclusiones,
+        "subtemas_negativos": subtemas_negativos,
         "temas": temas_out,
         "reviews_clasificadas": reviews_clasificadas,
     }
