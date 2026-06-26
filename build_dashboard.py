@@ -154,6 +154,7 @@ const DATE_OPTS = [3,7,15,30,60,90,180,360];
 const META = {};
 DATA.temas.forEach(t => META[t.nombre] = t);
 const THEME_NAMES = DATA.temas.map(t => t.nombre);
+DATA.reviews_clasificadas.forEach((r, i) => { r._id = i; });  // id para no repetir comentarios
 
 // estado de filtros
 let fDays = "all";
@@ -203,27 +204,40 @@ function aggregate(revs){
 const SENT_COLOR = {positivo:"var(--pos)", negativo:"var(--neg)", neutro:"var(--neu)", mixto:"var(--mix)"};
 const SENT_LABEL = {positivo:"Positivo", negativo:"Negativo", neutro:"Neutro", mixto:"Mixto"};
 function esc(s){ return (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
-function cut(s, n){ s = s||""; return s.length > n ? s.slice(0, n).trim() + "…" : s; }
+function clean(s){ return (s||"").replace(/<br\s*\/?>/gi, " ").replace(/\s+/g, " ").trim(); }
+function disp(s){ return esc(clean(s)); }
 
-function themeComments(revs, theme, k){
+// Selecciona comentarios variados por sentimiento para un tema, SIN reutilizar
+// comentarios ya usados en otros temas (used = Set global de _id).
+function themeComments(revs, theme, k, used){
   const groups = {negativo:[], positivo:[], mixto:[], neutro:[]};
-  revs.forEach(r => (r.tags||[]).forEach(t => {
-    if (t.tema === theme && groups[t.sentimiento]) groups[t.sentimiento].push({...r, _sent:t.sentimiento});
-  }));
+  revs.forEach(r => {
+    if (used && used.has(r._id)) return;
+    (r.tags||[]).forEach(t => {
+      if (t.tema === theme && groups[t.sentimiento]) groups[t.sentimiento].push({...r, _sent:t.sentimiento});
+    });
+  });
   Object.values(groups).forEach(g => g.sort((a,b)=>(b.texto||"").length-(a.texto||"").length));
   const out = []; const order = ["negativo","positivo","mixto","neutro"]; let added = true;
   while (out.length < k && added){
     added = false;
-    for (const s of order){ if (groups[s].length && out.length < k){ out.push(groups[s].shift()); added = true; } }
+    for (const s of order){
+      if (groups[s].length && out.length < k){
+        const item = groups[s].shift();
+        out.push(item);
+        if (used) used.add(item._id);
+        added = true;
+      }
+    }
   }
   return out;
 }
 function commentHTML(c){
   const trad = (c.traduccion && c.idioma && c.idioma !== "es")
-    ? `<div class="rc-trad"><b>es:</b> ${esc(cut(c.traduccion, 280))}</div>` : "";
+    ? `<div class="rc-trad"><b>Traducción (${c.idioma} → es):</b> ${disp(c.traduccion)}</div>` : "";
   return `<div class="rc">
     <span class="chip-sent" style="background:${SENT_COLOR[c._sent]}">${SENT_LABEL[c._sent]}</span>
-    <div class="rc-text">“${esc(cut(c.texto, 280))}”</div>
+    <div class="rc-text">“${disp(c.texto)}”</div>
     ${trad}
     <div class="rc-meta">${star(c.estrellas)} &middot; ${esc(c.usuario||"Usuario")} &middot; ${c.fecha||""}</div>
   </div>`;
@@ -237,10 +251,10 @@ function renderCarousel(){
   if (ci >= carPool.length) ci = 0;
   const c = carPool[ci];
   const trad = (c.traduccion && c.idioma && c.idioma !== "es")
-    ? `<div class="car-trad"><b>Traducción (${c.idioma} → es):</b> ${c.traduccion}</div>` : "";
+    ? `<div class="car-trad"><b>Traducción (${c.idioma} → es):</b> ${disp(c.traduccion)}</div>` : "";
   car.innerHTML = `
     <div class="car-stars">${star(c.estrellas)}</div>
-    <div class="car-text">“${c.texto}”</div>
+    <div class="car-text">“${disp(c.texto)}”</div>
     ${trad}
     <div class="car-meta">— ${c.usuario||"Usuario de Google"} &middot; ${c["reseñas_del_usuario"]??0} reseñas &middot; ${c.fecha||""}</div>
     <div class="car-nav">
@@ -290,10 +304,11 @@ function render(){
   const themes = document.getElementById("themes");
   themes.innerHTML = "";
   if (!visibles.length){ themes.innerHTML = '<div class="empty">No hay temas suficientes para este filtro.</div>'; }
+  const usedComments = new Set();  // para no repetir el mismo comentario entre temas
   visibles.forEach(t => {
     const p = t.sentimiento_pct;
     const seg = (val,v) => val>0 ? `<div style="width:${val}%;background:var(--${v})">${val>=8?val+"%":""}</div>` : "";
-    const coms = themeComments(revs, t.nombre, 5);
+    const coms = themeComments(revs, t.nombre, 5, usedComments);
     const comsHTML = coms.length ? coms.map(commentHTML).join("")
       : '<div class="empty">Sin comentarios para este filtro.</div>';
     const div = document.createElement("div"); div.className="theme";

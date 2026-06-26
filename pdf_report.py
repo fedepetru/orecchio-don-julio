@@ -8,6 +8,7 @@ en otros idiomas se usa la traducción. Se sanitiza el texto para evitar errores
     pdf_bytes = build_pdf(analysis)
 """
 
+import re
 from datetime import date
 
 from fpdf import FPDF
@@ -21,7 +22,7 @@ _REPL = {"’": "'", "‘": "'", "“": '"', "”": '"', "–": "-",
 
 def _l1(s):
     """Deja el texto compatible con latin-1 (fuentes core de fpdf2)."""
-    s = str(s or "")
+    s = re.sub(r"<br\s*/?>", " ", str(s or ""), flags=re.IGNORECASE)
     for k, v in _REPL.items():
         s = s.replace(k, v)
     return s.encode("latin-1", "ignore").decode("latin-1")
@@ -101,7 +102,7 @@ def build_pdf(analysis: dict) -> bytes:
         _w(pdf, f"Positivo {p.get('positivo', 0)}%  -  Mixto {p.get('mixto', 0)}%  -  "
                 f"Neutro {p.get('neutro', 0)}%  -  Negativo {p.get('negativo', 0)}%", size=9, color=110)
         for c in _theme_comments(revs, t["nombre"], 3):
-            txt = (c.get("traduccion") or c.get("texto") or "")[:220]
+            txt = c.get("traduccion") or c.get("texto") or ""
             _w(pdf, f"[{SENT_LBL.get(c['_sent'], '')}]", size=8, style="B")
             _w(pdf, f'"{txt}"', size=9)
 

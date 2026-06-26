@@ -47,6 +47,10 @@ def normalize_review(r: dict) -> dict:
     if not fecha:
         fecha = r.get("review_datetime_utc")
 
+    # Limpiar saltos HTML (<br>) y espacios redundantes del texto
+    texto = re.sub(r"<br\s*/?>", " ", r.get("review_text") or "", flags=re.IGNORECASE)
+    texto = re.sub(r"\s+", " ", texto).strip()
+
     return {
         "review_id": r.get("review_id"),
         "fecha": fecha,
@@ -56,7 +60,7 @@ def normalize_review(r: dict) -> dict:
         # 'local guide' y cantidad de reseñas previas del usuario:
         "es_local_guide": r.get("author_local_guide") or r.get("is_local_guide"),
         "reseñas_del_usuario": r.get("author_reviews_count"),
-        "texto": (r.get("review_text") or "").strip(),
+        "texto": texto,
         "likes": r.get("review_likes"),
         "respuesta_dueño": (r.get("owner_answer") or "").strip() or None,
     }
