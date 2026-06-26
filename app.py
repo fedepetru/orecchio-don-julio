@@ -33,8 +33,16 @@ OUTSCRAPER_KEY = secret("OUTSCRAPER_API_KEY")
 ANTHROPIC_KEY = secret("ANTHROPIC_API_KEY")
 APP_PASSWORD = secret("APP_PASSWORD")
 REVIEW_CAP = int(secret("REVIEW_CAP", "100") or "100")
+MAX_TRIES = int(secret("MAX_TRIES", "3") or "3")        # pruebas por sesión (demo)
+GLOBAL_CAP = int(secret("GLOBAL_CAP", "200") or "200")  # tope global de la demo (backstop de costo)
 
 st.set_page_config(page_title="Orecchio — Análisis de reseñas", page_icon="👂", layout="wide")
+
+
+@st.cache_resource
+def _global_usage():
+    """Contador global compartido entre sesiones (se reinicia si la app se reinicia)."""
+    return {"n": 0}
 
 
 # ---- Contraseña ----
@@ -75,10 +83,28 @@ n = st.slider("Cantidad de reseñas a analizar", min_value=30, max_value=REVIEW_
 
 st.caption(f"⏱️ El análisis tarda ~1-2 minutos. Tope: {REVIEW_CAP} reseñas por corrida.")
 
-if st.button("Generar reporte", type="primary"):
+# ---- Límite de uso (demo) ----
+if "uses" not in st.session_state:
+    st.session_state["uses"] = 0
+restantes = max(0, MAX_TRIES - st.session_state["uses"])
+gusage = _global_usage()
+demo_cerrada = gusage["n"] >= GLOBAL_CAP
+
+if restantes > 0:
+    st.info(f"🧪 Te quedan **{restantes}** prueba(s) de un total de **{MAX_TRIES}** a modo de demostración.")
+else:
+    st.warning(f"Alcanzaste el límite de **{MAX_TRIES}** pruebas de la demostración. ¡Gracias por probar Orecchio!")
+if demo_cerrada:
+    st.error("La demo alcanzó su cupo de uso por ahora. Probá más tarde.")
+
+if st.button("Generar reporte", type="primary", disabled=(restantes <= 0 or demo_cerrada)):
     if not url.strip():
         st.warning("Pegá un link de Google Maps primero.")
         st.stop()
+
+    # cuenta este intento (protege el costo)
+    st.session_state["uses"] += 1
+    gusage["n"] += 1
 
     prog = st.progress(0.0, text="Iniciando...")
 
@@ -100,6 +126,8 @@ if st.button("Generar reporte", type="primary"):
         st.stop()
 
     st.success(f"✅ {analysis['reviews_analizadas']} reseñas analizadas de «{analysis.get('place_name')}»")
+    quedan = max(0, MAX_TRIES - st.session_state["uses"])
+    st.caption(f"🧪 Te quedan {quedan} prueba(s) de {MAX_TRIES} a modo de demostración.")
     components.html(html, height=900, scrolling=True)
     st.download_button("⬇️ Descargar el tablero (HTML)", data=html,
                        file_name="dashboard.html", mime="text/html")
