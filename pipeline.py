@@ -11,6 +11,7 @@ Funciones:
 """
 
 import json
+import time
 from collections import defaultdict
 from datetime import datetime, timezone
 
@@ -41,14 +42,38 @@ def _expand_url(query: str) -> str:
     return q
 
 
-def collect(query, outscraper_key, reviews_limit=100, sort="newest", language="es"):
+def collect(query, outscraper_key, reviews_limit=100, sort="newest", language="es",
+            progress=None, poll_interval=6, max_wait=540):
+    """Colecta reseñas en modo ASÍNCRONO (manda el pedido y consulta el resultado
+    cada pocos segundos). Evita el timeout 504 de las conexiones síncronas largas."""
     client = OutscraperClient(api_key=outscraper_key)
     q = _expand_url(query)
-    results = client.google_maps_reviews(
+    resp = client.google_maps_reviews(
         q, reviews_limit=reviews_limit, limit=1, sort=sort,
-        language=language, async_request=False,
-        ignore_empty=True,  # traer solo reseñas CON texto (las de solo estrellas no se analizan)
+        language=language, ignore_empty=True, async_request=True,
     )
+
+    # Respuesta inmediata: id del pedido para hacer polling
+    request_id = resp.get("id") if isinstance(resp, dict) else None
+    if request_id is None:
+        results = resp if isinstance(resp, list) else None
+    else:
+        results, waited = None, 0
+        while waited < max_wait:
+            arch = client.get_request_archive(request_id) or {}
+            status = arch.get("status")
+            if status == "Success":
+                results = arch.get("data")
+                break
+            if status in ("Error", "Failed"):
+                raise RuntimeError("Outscraper no pudo completar la búsqueda. Probá de nuevo.")
+            if progress:
+                progress("Colectando reseñas desde Google Maps (puede tardar 1-2 min)...", 0.08)
+            time.sleep(poll_interval)
+            waited += poll_interval
+        if results is None:
+            raise RuntimeError("La búsqueda tardó demasiado. Probá con menos reseñas o reintentá.")
+
     if not results:
         raise RuntimeError("No se encontró el negocio. Probá con el link completo o el nombre.")
     place = results[0]

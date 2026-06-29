@@ -115,7 +115,7 @@ if st.button("Generar reporte", type="primary", disabled=(restantes <= 0 or demo
 
     try:
         cb("Colectando reseñas desde Google Maps...", 0.05)
-        meta, reviews = pipeline.collect(url.strip(), OUTSCRAPER_KEY, reviews_limit=n)
+        meta, reviews = pipeline.collect(url.strip(), OUTSCRAPER_KEY, reviews_limit=n, progress=cb)
         nombre = meta.get("place_name") or "Negocio"
         cb(f"{len(reviews)} reseñas colectadas de «{nombre}». Analizando...", 0.15)
         analysis = pipeline.analyze(reviews, nombre, meta, ANTHROPIC_KEY, progress=cb)
